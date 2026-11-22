@@ -1,17 +1,30 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:edit_doc_flutter/main.dart';
+import 'package:edit_doc_flutter/models/services/banco_local_service.dart';
+import 'package:edit_doc_flutter/models/services/documento_storage_service.dart';
+import 'package:edit_doc_flutter/models/services/preferences_service.dart';
+import 'package:edit_doc_flutter/viewmodels/auth_viewmodel.dart';
+import 'package:edit_doc_flutter/viewmodels/documentos_viewmodel.dart';
+import 'package:edit_doc_flutter/viewmodels/tema_viewmodel.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Material app builds smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+  testWidgets('sem sessão, o app abre na tela de login', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferencias = PreferencesService();
 
-    expect(find.byType(MaterialApp), findsOneWidget);
+    await tester.pumpWidget(
+      MeuApp(
+        temaVm: TemaViewModel(preferencias),
+        authVm: AuthViewModel(
+          bancoLocal: BancoLocalService(),
+          preferencias: preferencias,
+        ),
+        documentosVm: DocumentosViewModel(DocumentoStorageService()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Entrar'), findsOneWidget);
   });
 }
