@@ -11,10 +11,10 @@ class AuthViewModel extends ChangeNotifier {
     required BancoLocalService bancoLocal,
     required PreferencesService preferencias,
   })  : _banco = bancoLocal,
-        _preferencias = preferencias;
+        _prefs = preferencias;
 
   final BancoLocalService _banco;
-  final PreferencesService _preferencias;
+  final PreferencesService _prefs;
 
   Usuario? _usuario;
   bool _carregando = false;
@@ -28,10 +28,10 @@ class AuthViewModel extends ChangeNotifier {
   /// Restaura a sessão salva (usado na inicialização e após F5 na Web).
   Future<void> restaurarSessao() async {
     try {
-      final email = await _preferencias.lerSessao();
+      final email = await _prefs.lerSessao();
       if (email != null) {
         _usuario = await _banco.buscarPorEmail(email);
-        if (_usuario == null) await _preferencias.limparSessao();
+        if (_usuario == null) await _prefs.limparSessao();
       }
     } on StorageException catch (e) {
       _erro = e.mensagem;
@@ -71,7 +71,7 @@ class AuthViewModel extends ChangeNotifier {
         _erro = 'E-mail ou senha incorretos.';
         return false;
       }
-      await _preferencias.salvarSessao(usuario.email);
+      await _prefs.salvarSessao(usuario.email);
       _usuario = usuario;
       return true;
     } on StorageException catch (e) {
@@ -87,7 +87,7 @@ class AuthViewModel extends ChangeNotifier {
     _usuario = null;
     _erro = null;
     try {
-      await _preferencias.limparSessao();
+      await _prefs.limparSessao();
     } on StorageException catch (e) {
       _erro = e.mensagem;
     }
